@@ -1,11 +1,29 @@
-import React from "react";
+import React, { useContext, useEffect, useState } from "react";
 import dayjs from "dayjs";
+import GlobalContext from "../context/GlobalContext";
 
 export default function Day({ day, rowIdx }) {
-  // узнаем является ли день текущим и устанавливаем фон
+  const {
+    setDaySelected,
+    setShowEventModal,
+    filteredEvents,
+    setSelectedEvent,
+  } = useContext(GlobalContext);
+  const [dayEvents, setDayEvents] = useState([]);
+
+  // соотношу значения ивентов подходящих к определенному дню
+  useEffect(() => {
+    const events = filteredEvents.filter(
+      (evt) => dayjs(evt.day).format("DD-MM-YY") === day.format("DD-MM-YY")
+    );
+    setDayEvents(events);
+    console.log(filteredEvents);
+  }, [filteredEvents, day]);
+
+  // узнаю является ли день текущим и устанавливаю фон
   function getCurrentDayClass() {
     return day.format("DD-MM-YY") === dayjs().format("DD-MM-YY")
-      ? "bg-blue-600 text-white rounded-full w-7"
+      ? "bg-red-600 text-white rounded-full w-7"
       : "";
   }
   return (
@@ -18,6 +36,23 @@ export default function Day({ day, rowIdx }) {
           {day.format("DD")}
         </p>
       </header>
+      <div
+        className="flex-1 cursor-pointer h-[90px]"
+        onClick={() => {
+          setDaySelected(day);
+          setShowEventModal(true);
+        }}
+      >
+        {dayEvents.map((evt, idx) => (
+          <div
+            key={idx}
+            className={`bg-${evt.label}-200 p-1.5 ml-3 mr-3 text-gray-600 text-sm rounded mb-1 truncate `}
+            onClick={() => setSelectedEvent(evt)}
+          >
+            {evt.title}
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
